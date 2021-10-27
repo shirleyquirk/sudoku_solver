@@ -11,13 +11,13 @@ import std/bitops
 
 
 type
-  Base = uint16
-  Sudoku = array[81,Base]#range[0'u8..9'u8]]#distinct string
+  Base = uint8
+  Sudoku = array[81,Base]
 proc toSudoku(s:string):Sudoku =
   for i,v in s:
     result[i] = (if v=='.': 0 else: ord(v) - ord('0'))
 
-template `[]`(g:Sudoku,x:int,y:int):int8 = g[y*9+x]
+#template `[]`(g:Sudoku,x:int,y:int):int8 = g[y*9+x]
 
 proc toString(s:Sudoku):string =
   result = newString(81)
@@ -232,7 +232,9 @@ proc resolvTailCall(g:var Sudoku):bool =
   var stack = @[g]
   return resolvTailCall(g,stack)
 
+
 #test cases
+#[
 var g="""..1....8......45....5.7......273..........2..358.1....2.3.56...9.......1..6.9.7..""".toSudoku
 echo g
 var t = getTime()
@@ -251,20 +253,20 @@ echo g
 doAssert resolvIterative(g)
 g.unswizzle(swiz)
 echo g, " took: ", getTime() - t
-
-
-echo "\n---------------------------------------------------------------------\n\n"
-import sudokus
-let bigt = getTime()
-for x in gg:
-  t = getTime()
-  var h = x.toSudoku
-  when defined(Swizzling):
-    let swiz = h.swizzle()
-  doAssert resolvIterative(h)
-  when defined(Swizzling):
-    h.unswizzle(swiz)
-  let d = getTime() - t
-  if d.inMilliseconds > 10:
-    echo x.toSudoku, "\n=>\n",h," took ", d, "\n\n"
-echo "all 1011 took:",getTime() - bigt
+]#
+when isMainModule:
+  import sudokus
+  echo "\n---------------------------------------------------------------------\n\n"
+  let bigt = getTime()
+  for x in gg:
+    let t = getTime()
+    var h = x.toSudoku
+    when defined(Swizzling):
+      let swiz = h.swizzle()
+    doAssert resolvIterative(h)
+    when defined(Swizzling):
+      h.unswizzle(swiz)
+    let d = getTime() - t
+    if d.inMilliseconds > 10:
+      echo x.toSudoku, "\n=>\n",h," took ", d, "\n\n"
+  echo "all 1011 took:",getTime() - bigt
